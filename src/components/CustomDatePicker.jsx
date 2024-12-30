@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LuCalendar } from "react-icons/lu";
+import 'assets/css/components';
 
 export default function CustomDatePicker ({ selectedDate, onChange }) {
     const [isOpen, setIsOpen] = useState(false);
