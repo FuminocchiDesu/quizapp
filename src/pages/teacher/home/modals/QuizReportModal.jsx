@@ -84,14 +84,26 @@ export const QuizReportModal = ({ isOpen, onClose, quizId, quizTitle }) => {
     };
 
     const processStudentScores = (attempts) => {
-        const scores = attempts.map(attempt => ({
-            studentName: `${attempt.student.first_name} ${attempt.student.last_name}`,
-            score: attempt.score,
-            attemptDate: new Date(attempt.attempt_datetime).toLocaleDateString(),
-            totalPoints: attempt.total_points,
-            maxPoints: attempt.max_points,
-        }));
-
+        const scores = attempts.map(attempt => {
+            const firstName = attempt.student.first_name;
+            const lastName = attempt.student.last_name;
+            const username = attempt.student.username;
+            
+            // If both first_name and last_name exist, use full name + username
+            // Otherwise, just use username
+            const studentName = firstName && lastName 
+                ? `${firstName} ${lastName}`
+                : username;
+            
+            return {
+                studentName,
+                score: attempt.score,
+                attemptDate: new Date(attempt.attempt_datetime).toLocaleDateString(),
+                totalPoints: attempt.total_points,
+                maxPoints: attempt.max_points,
+            };
+        });
+    
         // Sort by score in descending order
         scores.sort((a, b) => b.score - a.score);
         setStudentScores(scores);

@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/', // Add this for Vercel
   resolve: {
     alias: {
       pages: resolve(__dirname, 'src/pages'),
