@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import 'assets/css/student';
 import { FaRegClock } from "react-icons/fa";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -201,13 +201,13 @@ export const TakeQuiz = () => {
     return (
         <>
             <nav className="QuizzesTeacher__breadcrumb">
-                <a href="/student/home" className="QuizzesTeacher__breadcrumb-nav">
+                <Link to="/student/home" className="QuizzesTeacher__breadcrumb-nav">
                     <span>Home</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
-                <a href={`/student/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
+                <Link to={`/student/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
                     <span>{classData?.name || 'Loading...'}</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
                 <span>{quiz?.title || 'Loading...'}</span>
             </nav>

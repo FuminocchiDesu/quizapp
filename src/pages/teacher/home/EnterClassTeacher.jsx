@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 import { LuClipboardList } from "react-icons/lu";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -173,9 +173,9 @@ export const EnterClassTeacher = () => {
     return (
         <>
             <nav className="QuizzesTeacher__breadcrumb">
-                <a href="/teacher/home" className="QuizzesTeacher__breadcrumb-nav">
+                <Link to="/teacher/home" className="QuizzesTeacher__breadcrumb-nav">
                         <span>Home</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
                 <span>{classData?.name || 'Loading...'}</span>
             </nav>

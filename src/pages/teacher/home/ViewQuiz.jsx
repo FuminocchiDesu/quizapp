@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import 'assets/css/teacher';
 
 export const ViewQuiz = () => {
@@ -86,13 +86,13 @@ export const ViewQuiz = () => {
     return (
         <>
             <nav className="QuizzesTeacher__breadcrumb">
-                <a href="/teacher/home" className="QuizzesTeacher__breadcrumb-nav">
+                <Link to="/teacher/home" className="QuizzesTeacher__breadcrumb-nav">
                     <span>Home</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
-                <a href={`/teacher/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
+                <Link to={`/teacher/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
                     <span>{classData?.name || 'Loading...'}</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
                 <span>{quiz?.title || 'Loading...'}</span>
             </nav>  
