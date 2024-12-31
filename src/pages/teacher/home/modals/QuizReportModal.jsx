@@ -92,7 +92,7 @@ export const QuizReportModal = ({ isOpen, onClose, quizId, quizTitle }) => {
             // If both first_name and last_name exist, use full name + username
             // Otherwise, just use username
             const studentName = firstName && lastName 
-                ? `${firstName} ${lastName} ${username}`
+                ? `${firstName} ${lastName}`
                 : username;
             
             return {
