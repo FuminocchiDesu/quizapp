@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
 import 'assets/css/student';
 
 const CheckIcon = () => (
@@ -177,13 +177,13 @@ export const QuizResult = () => {
     return (
         <>
             <nav className="QuizzesTeacher__breadcrumb">
-                <a href="/student/home" className="QuizzesTeacher__breadcrumb-nav">
+                <Link to="/student/home" className="QuizzesTeacher__breadcrumb-nav">
                     <span>Home</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
-                <a href={`/student/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
+                <Link to={`/student/home/class/${classData?.id}`} className="QuizzesTeacher__breadcrumb-nav">
                     <span>{classData?.name || 'Loading...'}</span>
-                </a>
+                </Link>
                 <span> &gt; </span>
                 <span>{quiz?.title || 'Loading...'}</span>
             </nav>
