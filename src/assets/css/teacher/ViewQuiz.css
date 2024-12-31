@@ -5,9 +5,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    position: relative;
 }
 
 .ViewQuiz__question-points {
+    position: absolute;
+    right: 0;
     background-color: #DDE9E6;
     color: #67A292;
     padding: 4px 12px;
