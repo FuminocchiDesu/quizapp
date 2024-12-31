@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link} from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import 'assets/css/student';
 import { FaRegClock } from "react-icons/fa";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -17,6 +17,7 @@ export const TakeQuiz = () => {
     const [validationErrors, setValidationErrors] = useState({});
     const [isCompleted, setIsCompleted] = useState(false);
     const [quizResults, setQuizResults] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const questionsPerPage = 5;
 
@@ -41,7 +42,6 @@ export const TakeQuiz = () => {
                 setQuiz(quizData);
                 setTimeLeft(quizData.time_limit_minutes * 60);
 
-                // Fetch class data using the first class ID from the quiz
                 if (quizData.classes && quizData.classes.length > 0) {
                     const classResponse = await fetch(`https://apiquizapp.pythonanywhere.com/api/classes/${quizData.classes[0]}/`, {
                         headers: {
@@ -67,13 +67,12 @@ export const TakeQuiz = () => {
     }, [quizId]);
 
     useEffect(() => {
-        if (timeLeft === null || timeLeft <= 0) return;
+        if (timeLeft === null || timeLeft <= 0 || isCompleted) return;
 
         const timer = setInterval(() => {
             setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    handleSubmit();
+                if (prev <= 1 && !isSubmitting) {
+                    handleSubmit(true);
                     return 0;
                 }
                 return prev - 1;
@@ -81,8 +80,7 @@ export const TakeQuiz = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft]);
-
+    }, [timeLeft, isCompleted, isSubmitting]);
 
     const validateCurrentPage = () => {
         const startIndex = currentPage * questionsPerPage;
@@ -103,8 +101,6 @@ export const TakeQuiz = () => {
         return isValid;
     };
 
-
-
     const handleAnswerChange = (questionId, answer) => {
         setAnswers(prev => ({
             ...prev,
@@ -117,36 +113,59 @@ export const TakeQuiz = () => {
         }));
     };
 
-    const handleSubmit = async () => {
-        if (validateCurrentPage()) {
-            try {
-                const accessToken = localStorage.getItem('accessToken');
-                const response = await fetch(`https://apiquizapp.pythonanywhere.com/api/quizzes/${quizId}/take_quiz/`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ answers })
+    const handleSubmit = async (isAutoSubmit = false) => {
+        if (isSubmitting) return;
+        
+        // Skip validation if it's an auto-submit due to time running out
+        if (!isAutoSubmit && !validateCurrentPage()) {
+            return;
+        }
+        
+        setIsSubmitting(true);
+        
+        try {
+            // Fill in empty answers with empty strings for auto-submit
+            let submissionAnswers = { ...answers };
+            if (isAutoSubmit) {
+                quiz.questions.forEach(question => {
+                    if (!submissionAnswers[question.id]) {
+                        submissionAnswers[question.id] = '';
+                    }
                 });
+            }
 
-                if (!response.ok) {
-                    throw new Error('Failed to submit quiz');
-                }
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await fetch(`https://apiquizapp.pythonanywhere.com/api/quizzes/${quizId}/take_quiz/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ answers: submissionAnswers })
+            });
 
-                const result = await response.json();
-                setQuizResults(result); // Store the results
+            if (!response.ok) {
+                throw new Error('Failed to submit quiz');
+            }
+
+            const result = await response.json();
+            setQuizResults(result);
+            setIsCompleted(true);
+        } catch (err) {
+            // If auto-submit fails, still mark as completed to show thank you page
+            if (isAutoSubmit) {
                 setIsCompleted(true);
-            } catch (err) {
+            } else {
                 setError(err.message);
             }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleViewScore = () => {
         navigate(`results`, { state: { results: quizResults } });
     };
-
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
@@ -158,7 +177,7 @@ export const TakeQuiz = () => {
         if (validateCurrentPage()) {
             if (currentPage < Math.ceil(quiz.questions.length / questionsPerPage) - 1) {
                 setCurrentPage(prev => prev + 1);
-                setValidationErrors({}); // Clear validation errors when changing page
+                setValidationErrors({});
             }
         }
     };
@@ -166,13 +185,14 @@ export const TakeQuiz = () => {
     const goToPreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(prev => prev - 1);
+            setValidationErrors({});
         }
     };
 
     if (loading) {
         return (
             <div className="quiz-loading">
-                 <div className="loading-spinner"></div>
+                <div className="loading-spinner"></div>
             </div>
         );
     }
@@ -212,7 +232,7 @@ export const TakeQuiz = () => {
                 <span>{quiz?.title || 'Loading...'}</span>
             </nav>
 
-            <div className='TakeQuiz__box-shadow'>
+            <div className="TakeQuiz__box-shadow">
                 <div className="TakeQuiz__quiz-header">
                     <div className="TakeQuiz__title-section">
                         <h1 className="TakeQuiz__section-header">{quiz.title}</h1>
@@ -229,9 +249,11 @@ export const TakeQuiz = () => {
                 {!isCompleted ? (
                     <div className="TakeQuiz__quiz-main-take">
                         {currentQuestions.map((questionData, index) => (
-                            <div key={questionData.id}   className={`TakeQuiz__question-container ${
-                                index === currentQuestions.length - 1 ? 'last' : ''
-                            }`}
+                            <div 
+                                key={questionData.id} 
+                                className={`TakeQuiz__question-container ${
+                                    index === currentQuestions.length - 1 ? 'last' : ''
+                                }`}
                             >
                                 <div className="ViewQuiz__question-header">
                                     <p className="TakeQuiz__question-text">
@@ -291,7 +313,7 @@ export const TakeQuiz = () => {
                                 )}
 
                                 {questionData.question_type === 'ID' && (
-                                    <div className='TakeQuiz__input-short-container'>
+                                    <div className="TakeQuiz__input-short-container">
                                         <input
                                             type="text"
                                             className="TakeQuiz__identification-input"
@@ -322,9 +344,10 @@ export const TakeQuiz = () => {
                             {currentPage === totalPages - 1 ? (
                                 <button 
                                     className="TakeQuiz__submit-quiz-button"
-                                    onClick={handleSubmit}
+                                    onClick={() => handleSubmit()}
+                                    disabled={isSubmitting}
                                 >
-                                    Submit
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
                                 </button>
                             ) : (
                                 <button 
@@ -335,36 +358,32 @@ export const TakeQuiz = () => {
                                 </button>
                             )}
                         </div>
-                        
                     </div>
                 ) : (
-                    <div className='ThankyouSubmit__content'>
-                        <div className='ThankyouSubmit__header'>
-                            <FaRegCircleCheck className='ThankyouSubmit__header-icon'/>
-                            <span className='ThankyouSubmit__header-text'>Thank You!</span>
+                    <div className="ThankyouSubmit__content">
+                        <div className="ThankyouSubmit__header">
+                            <FaRegCircleCheck className="ThankyouSubmit__header-icon"/>
+                            <span className="ThankyouSubmit__header-text">Thank You!</span>
                         </div>
-                        <p className='ThankyouSubmit__header-sub-text'>Your response has been submitted.</p>
+                        <p className="ThankyouSubmit__header-sub-text">Your response has been submitted.</p>
 
-                        <div className='ThankyouSubmit__btn-actions'>
-                            <button className='ThankyouSubmit__btn-view-score'
-                            onClick={handleViewScore}
+                        <div className="ThankyouSubmit__btn-actions">
+                            <button 
+                                className="ThankyouSubmit__btn-view-score"
+                                onClick={handleViewScore}
                             >
                                 View Score
                             </button>
-                            <button className='ThankyouSubmit__btn-done'
-                            onClick={() => navigate(`/student/home/class/${classData?.id}`)}
+                            <button 
+                                className="ThankyouSubmit__btn-done"
+                                onClick={() => navigate(`/student/home/class/${classData?.id}`)}
                             >
                                 Done
                             </button>
-
                         </div>
-                        
-                </div>
+                    </div>
                 )}
             </div>
-
-           
-
         </>
     );
 };
