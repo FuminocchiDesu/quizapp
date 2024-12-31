@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
 import 'assets/css/student';
+import { FaRegCircleCheck } from "react-icons/fa6";
 
 const CheckIcon = () => (
     <svg
@@ -143,7 +144,7 @@ export const QuizResult = () => {
                 <div className="QuizResult__result-header">
                     <div className="QuizResult__question-number">Question {index + 1}</div>
                     <div className="result-icon">
-                        {result.correct ? <CheckIcon /> : <XIcon />}
+                        {result.correct ? <FaRegCircleCheck className="QuizResult__result-check-icon"/> : <XIcon />}
                     </div>
                 </div>
                 <div className="QuizResult__question-text">
