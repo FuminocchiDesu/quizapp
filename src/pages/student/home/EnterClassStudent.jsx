@@ -229,7 +229,8 @@ export const EnterClassStudent = () => {
                                             </div>
                                         ) : (
                                             <div className="quiz-timing">
-                                                <span className="EnterClassStudent__quiz-closed">
+                                                <span className={`EnterClassStudent__quiz-closed ${
+                                                     hasAttempt ? 'quiz-timing--completed' : 'quiz-timing--closed'}`}>
                                                     {hasAttempt ? 'Completed' : 'Closed'}
                                                 </span>
                                             </div>

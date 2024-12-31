@@ -131,11 +131,18 @@
 }
 
 .EnterClassStudent__quiz-closed{
-    background-color: #a2a3a6;
     padding: 4px 7px;
     border-radius: 5px;
     font-weight: 500;
     font-size: 15px;
+}
+
+.quiz-timing--completed {
+    background-color: #5BA092; 
+}
+
+.quiz-timing--closed {
+    background-color: #A26768;
 }
 
 .EnterClassStudent__no-available{
